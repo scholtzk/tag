@@ -124,23 +124,20 @@
         const backgroundMusic = document.getElementById('backgroundMusic');
         const musicToggle = document.getElementById('musicToggle');
 
-        function toggleMusic() {
-            if (backgroundMusic.paused) {
-                backgroundMusic.play();
-                musicToggle.textContent = 'Pause Music';
-            } else {
-                backgroundMusic.pause();
-                musicToggle.textContent = 'Play Music';
-            }
+        function playMusic() {
+            backgroundMusic.play();
+            musicToggle.style.display = 'none'; // Hide the button after playing
         }
 
-        musicToggle.addEventListener('click', toggleMusic);
+        musicToggle.addEventListener('click', playMusic);
 
         document.addEventListener('DOMContentLoaded', function() {
             // Try to play music automatically, but it may be blocked by the browser
-            backgroundMusic.play().catch(function() {
+            backgroundMusic.play().then(function() {
+                musicToggle.style.display = 'none'; // Hide the button if autoplay succeeds
+            }).catch(function() {
                 console.log('Autoplay was prevented');
-                // We don't need to change the button text here as it's already set to "Play Music"
+                // Button remains visible if autoplay is blocked
             });
         });
     </script>
