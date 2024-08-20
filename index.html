@@ -144,7 +144,7 @@
 
         function playMusic() {
             backgroundMusic.play();
-            backgroundMusic.volume = 1; // Set volume to 25%
+            backgroundMusic.volume = 0.1; // Set volume to 25%
             musicToggle.style.display = 'none'; // Hide the button after playing
         }
 
@@ -169,12 +169,12 @@
     // Resume background music after 3 seconds
     setTimeout(function() {
         backgroundMusic.play();
-    }, 3000);
+    }, 7000);
                 
                 // Hide popup after 10 seconds
                 setTimeout(function() {
                     popupImage.style.display = 'none';
-                }, 3000);
+                }, 7000);
             }, 5000);
         });
     </script>
