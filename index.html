@@ -163,6 +163,14 @@
             setTimeout(function() {
                 popupImage.style.display = 'block';
                 popupSound.play();
+
+                    // Pause background music
+    backgroundMusic.pause();
+    
+    // Resume background music after 3 seconds
+    setTimeout(function() {
+        backgroundMusic.play();
+    }, 3000);
                 
                 // Hide popup after 10 seconds
                 setTimeout(function() {
