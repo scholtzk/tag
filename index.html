@@ -33,6 +33,16 @@
             padding: 10px;
             font-size: 16px;
         }
+        #popupImage {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -46,12 +56,19 @@
         Your browser does not support the audio element.
     </audio>
 
+    <audio id="popupSound">
+        <source src="popup.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <img id="popupImage" src="popup.jpg" alt="Popup Image">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
         const firebaseConfig = {
-  apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
+              apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
   authDomain: "megatag-fc711.firebaseapp.com",
   databaseURL: "https://megatag-fc711-default-rtdb.firebaseio.com",
   projectId: "megatag-fc711",
@@ -123,22 +140,35 @@
 
         const backgroundMusic = document.getElementById('backgroundMusic');
         const musicToggle = document.getElementById('musicToggle');
+        const popupSound = document.getElementById('popupSound');
+        const popupImage = document.getElementById('popupImage');
 
         function playMusic() {
             backgroundMusic.play();
+            backgroundMusic.volume = 0.25; // Set volume to 25%
             musicToggle.style.display = 'none'; // Hide the button after playing
         }
 
         musicToggle.addEventListener('click', playMusic);
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to play music automatically, but it may be blocked by the browser
             backgroundMusic.play().then(function() {
-                musicToggle.style.display = 'none'; // Hide the button if autoplay succeeds
+                backgroundMusic.volume = 0.25; // Set volume to 25%
+                musicToggle.style.display = 'none';
             }).catch(function() {
                 console.log('Autoplay was prevented');
-                // Button remains visible if autoplay is blocked
             });
+
+            // Show popup after 15 seconds
+            setTimeout(function() {
+                popupImage.style.display = 'block';
+                popupSound.play();
+                
+                // Hide popup after 10 seconds
+                setTimeout(function() {
+                    popupImage.style.display = 'none';
+                }, 10000);
+            }, 15000);
         });
     </script>
 </body>
