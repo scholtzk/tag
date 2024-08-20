@@ -28,25 +28,30 @@
             font-size: 24px;
             margin-top: 20px;
         }
+        #musicToggle {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <div id="timer">24:00:00</div>
     <input type="text" id="nameInput" placeholder="Enter name and press Enter">
     <div id="currentName"></div>
+    <button id="musicToggle">Pause Music</button>
+
+    <audio id="backgroundMusic" loop>
+        <source src="https://youtu.be/VZIm_2MgdeA?si=KIKM_pZ11JZDdKHA&t=61" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
         const firebaseConfig = {
-  apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
-  authDomain: "megatag-fc711.firebaseapp.com",
-  projectId: "megatag-fc711",
-  storageBucket: "megatag-fc711.appspot.com",
-  messagingSenderId: "356543639766",
-  appId: "1:356543639766:web:06ebc390086f6d00a41977",
-  measurementId: "G-CQ40WBZY41",
+            // Your Firebase configuration here
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -100,7 +105,6 @@
             }
         });
 
-        // Listen for changes in the database
         database.ref('timer').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -108,6 +112,27 @@
                 updateCurrentName(data.currentName || '');
                 startTimer();
             }
+        });
+
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicToggle = document.getElementById('musicToggle');
+
+        function toggleMusic() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                musicToggle.textContent = 'Pause Music';
+            } else {
+                backgroundMusic.pause();
+                musicToggle.textContent = 'Play Music';
+            }
+        }
+
+        musicToggle.addEventListener('click', toggleMusic);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            backgroundMusic.play().catch(function() {
+                musicToggle.textContent = 'Play Music';
+            });
         });
     </script>
 </body>
