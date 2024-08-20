@@ -35,7 +35,28 @@
     <input type="text" id="nameInput" placeholder="Enter name and press Enter">
     <div id="currentName"></div>
 
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            // Replace with your Firebase project configuration
+  apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
+  authDomain: "megatag-fc711.firebaseapp.com",
+  projectId: "megatag-fc711",
+  storageBucket: "megatag-fc711.appspot.com",
+  messagingSenderId: "356543639766",
+  appId: "1:356543639766:web:06ebc390086f6d00a41977",
+  measurementId: "G-CQ40WBZY41",
+            appId: "tag"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let countdown;
         let timeLeft = 24 * 60 * 60; // 24 hours in seconds
 
@@ -56,13 +77,18 @@
                 clearInterval(countdown);
             } else {
                 timeLeft--;
+                database.ref('timer').set({
+                    timeLeft: timeLeft
+                });
             }
         }
 
         function resetTimer(name) {
             timeLeft = 24 * 60 * 60;
-            document.getElementById('currentName').textContent = `Current: ${name}`;
-            startTimer();
+            database.ref('timer').set({
+                timeLeft: timeLeft,
+                currentName: name
+            });
         }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -75,7 +101,15 @@
             }
         });
 
-        startTimer();
+        // Listen for changes in the database
+        database.ref('timer').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                timeLeft = data.timeLeft;
+                document.getElementById('currentName').textContent = `Current: ${data.currentName || ''}`;
+                startTimer();
+            }
+        });
     </script>
 </body>
 </html>
