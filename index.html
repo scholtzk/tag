@@ -35,14 +35,11 @@
     <input type="text" id="nameInput" placeholder="Enter name and press Enter">
     <div id="currentName"></div>
 
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
-            // Replace with your Firebase project configuration
   apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
   authDomain: "megatag-fc711.firebaseapp.com",
   projectId: "megatag-fc711",
@@ -52,7 +49,6 @@
   measurementId: "G-CQ40WBZY41",
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -76,7 +72,7 @@
                 clearInterval(countdown);
             } else {
                 timeLeft--;
-                database.ref('timer').set({
+                database.ref('timer').update({
                     timeLeft: timeLeft
                 });
             }
@@ -88,6 +84,10 @@
                 timeLeft: timeLeft,
                 currentName: name
             });
+        }
+
+        function updateCurrentName(name) {
+            document.getElementById('currentName').textContent = `Current: ${name}`;
         }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -105,7 +105,7 @@
             const data = snapshot.val();
             if (data) {
                 timeLeft = data.timeLeft;
-                document.getElementById('currentName').textContent = `Current: ${data.currentName || ''}`;
+                updateCurrentName(data.currentName || '');
                 startTimer();
             }
         });
