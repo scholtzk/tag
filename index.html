@@ -123,8 +123,11 @@ function resetTimer(name) {
 function updateCurrentName(name, taggedAt) {
     database.ref('timer/taggedAt').once('value', (snapshot) => {
         const serverTaggedAt = snapshot.val();
+        console.log('Server tagged at:', serverTaggedAt);
         const taggedDate = new Date(serverTaggedAt);
+        console.log('Tagged date object:', taggedDate);
         const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        console.log('Formatted time:', formattedTime);
         document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
     });
 }
@@ -197,17 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ... rest of the code ...
 });
 
-        function updateCurrentName(name, taggedAt) {
-    database.ref('timer/taggedAt').once('value', (snapshot) => {
-        const serverTaggedAt = snapshot.val();
-        console.log('Server tagged at:', serverTaggedAt);
-        const taggedDate = new Date(serverTaggedAt);
-        console.log('Tagged date object:', taggedDate);
-        const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        console.log('Formatted time:', formattedTime);
-        document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
-    });
-}
 
             // Show popup after 15 seconds
 setTimeout(function() {
