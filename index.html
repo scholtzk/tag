@@ -115,13 +115,17 @@ function resetTimer(name) {
     const startTime = Date.now();
     database.ref('timer').set({
         startTime: startTime,
-        currentName: name
+        currentName: name,
+        taggedAt: startTime // Store the time when the player was tagged
     });
+    logNameInput(name);
 }
 
-        function updateCurrentName(name) {
-            document.getElementById('currentName').textContent = `Current: ${name}`;
-        }
+function updateCurrentName(name, taggedAt) {
+    const taggedDate = new Date(taggedAt);
+    const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
+}
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
@@ -136,7 +140,7 @@ function resetTimer(name) {
 database.ref('timer').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        updateCurrentName(data.currentName || '');
+        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
         startTimer();
     }
 });
