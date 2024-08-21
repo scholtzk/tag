@@ -89,6 +89,28 @@ function startTimer() {
     countdown = setInterval(updateTimer, 1000);
 }
 
+        function updateTimer() {
+    database.ref('timer').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.startTime) {
+            const currentTime = Date.now();
+            const elapsedSeconds = Math.floor((currentTime - data.startTime) / 1000);
+            timeLeft = Math.max(24 * 60 * 60 - elapsedSeconds, 0);
+
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            const seconds = timeLeft % 60;
+
+            document.getElementById('timer').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft === 0) {
+                clearInterval(countdown);
+            }
+        }
+    });
+}
+
 function resetTimer(name) {
     const startTime = Date.now();
     database.ref('timer').set({
