@@ -116,20 +116,25 @@ function resetTimer(name) {
         currentName: name,
         taggedAt: firebase.database.ServerValue.TIMESTAMP
     };
-    database.ref('timer').update(updates);
+    database.ref('timer').update(updates).then(() => {
+        console.log('Timer reset with server timestamp');
+    }).catch((error) => {
+        console.error('Error updating timer:', error);
+    });
     logNameInput(name);
 }
 
 function updateCurrentName(name, taggedAt) {
-    database.ref('timer/taggedAt').once('value', (snapshot) => {
-        const serverTaggedAt = snapshot.val();
-        console.log('Server tagged at:', serverTaggedAt);
-        const taggedDate = new Date(serverTaggedAt);
-        console.log('Tagged date object:', taggedDate);
-        const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        console.log('Formatted time:', formattedTime);
+    if (taggedAt) {
+        const taggedDate = new Date(taggedAt);
+        const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
-    });
+        console.log('Tagged at timestamp:', taggedAt);
+        console.log('Formatted time:', formattedTime);
+    } else {
+        console.log('No valid taggedAt timestamp');
+        document.getElementById('currentName').textContent = `Current: ${name}`;
+    }
 }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -144,11 +149,26 @@ function updateCurrentName(name, taggedAt) {
 
 database.ref('timer').on('value', (snapshot) => {
     const data = snapshot.val();
-    if (data) {
-        updateCurrentName(data.currentName || '', data.taggedAt);
+    if (data && data.currentName && data.taggedAt) {
+        console.log('Received data:', data);
+        updateCurrentName(data.currentName, data.taggedAt);
         startTimer();
+    } else {
+        console.log('Incomplete data received:', data);
     }
 });
+
+        function checkServerTime() {
+    const offsetRef = firebase.database().ref(".info/serverTimeOffset");
+    offsetRef.on("value", (snap) => {
+        const offset = snap.val();
+        const estimatedServerTimeMs = new Date().getTime() + offset;
+        console.log("Estimated server time: ", new Date(estimatedServerTimeMs).toLocaleString());
+    });
+}
+
+// Call this function when your app initializes
+checkServerTime();
     function logNameInput(name) {
     const logRef = database.ref('nameLog').push();
     logRef.set({
