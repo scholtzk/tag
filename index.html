@@ -173,40 +173,48 @@ database.ref('timer').on('value', (snapshot) => {
         const popupImage = document.getElementById('popupImage');
 
         function playMusic() {
-            backgroundMusic.play();
-            backgroundMusic.volume = 0.1; // Set volume to 25%
-            musicToggle.style.display = 'none'; // Hide the button after playing
-        }
+    backgroundMusic.volume = 0.1; // Set initial volume to 10%
+    backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+    musicToggle.style.display = 'none'; // Hide the button after playing
+}
 
         musicToggle.addEventListener('click', playMusic);
 
-        document.addEventListener('DOMContentLoaded', function() {
-            backgroundMusic.play().then(function() {
-                backgroundMusic.volume = 1; // Set volume to 25%
-                musicToggle.style.display = 'none';
-            }).catch(function() {
-                console.log('Autoplay was prevented');
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    backgroundMusic.volume = 0.1; // Set initial volume to 10%
+    backgroundMusic.play().then(function() {
+        musicToggle.style.display = 'none';
+    }).catch(function() {
+        console.log('Autoplay was prevented');
+    });
+
+    // ... rest of the code ...
+});
 
             // Show popup after 15 seconds
-            setTimeout(function() {
-                popupImage.style.display = 'block';
-                popupSound.play();
-
-                    // Pause background music
-    backgroundMusic.pause();
+setTimeout(function() {
+    popupImage.style.display = 'block';
     
-    // Resume background music after 3 seconds
+    // Play popup sound
+    popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
+    
+    // Pause background music if it's playing
+    if (!backgroundMusic.paused) {
+        backgroundMusic.pause();
+        
+        // Resume background music after 3 seconds at full volume
+        setTimeout(function() {
+            backgroundMusic.volume = 1.0;
+            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+        }, 3000);
+    }
+    
+    // Hide popup after 3 seconds
     setTimeout(function() {
-        backgroundMusic.play();
+        popupImage.style.display = 'none';
     }, 3000);
-                
-                // Hide popup after 10 seconds
-                setTimeout(function() {
-                    popupImage.style.display = 'none';
-                }, 3000);
-            }, 10000);
-        });
+}, 10000);
+
     </script>
 </body>
 </html>
