@@ -57,6 +57,11 @@
         Your browser does not support the audio element.
     </audio>
 
+    <audio id="notificationSound">
+    <source src="popup.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
     <audio id="popupSound">
         <source src="popup.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -123,12 +128,17 @@ function resetTimer(name) {
     logNameInput(name);
 }
 
-        function logNameInput(name) {
+function logNameInput(name) {
     const logRef = database.ref('nameLog').push();
     logRef.set({
         name: name,
         timestamp: firebase.database.ServerValue.TIMESTAMP
     });
+
+    // Play the notification sound
+    const notificationSound = document.getElementById('notificationSound');
+    notificationSound.volume = 0.5; // Set the volume to 50%
+    notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
 }
         
 function updateCurrentName(name, taggedAt) {
@@ -147,11 +157,13 @@ function updateCurrentName(name, taggedAt) {
             }
         });
 
-database.ref('timer').on('value', (snapshot) => {
+database.ref('nameLog').on('child_added', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
-        startTimer();
+        // Play the notification sound
+        const notificationSound = document.getElementById('notificationSound');
+        notificationSound.volume = 0.5; // Set the volume to 50%
+        notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
     }
 });
 
