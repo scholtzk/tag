@@ -112,18 +112,17 @@ function updateTimer() {
 }
 
 function resetTimer(name) {
-    const startTime = Date.now();
-    database.ref('timer').set({
-        startTime: startTime,
+    const updates = {
         currentName: name,
-        taggedAt: startTime // Store the time when the player was tagged
-    });
+        taggedAt: firebase.database.ServerValue.TIMESTAMP // Use server timestamp
+    };
+    database.ref('timer').update(updates);
     logNameInput(name);
 }
 
 function updateCurrentName(name, taggedAt) {
     const taggedDate = new Date(taggedAt);
-    const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const formattedTime = taggedDate.toLocaleString(); // This will show date and time
     document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
 }
 
