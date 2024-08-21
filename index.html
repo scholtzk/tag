@@ -165,14 +165,20 @@ database.ref('timer').on('value', (snapshot) => {
     }
 });
 
-database.ref('nameLog').on('child_added', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        // Play the notification sound
-        const notificationSound = document.getElementById('notificationSound');
-        notificationSound.volume = 0.5; // Set the volume to 50%
-        notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationSound = document.getElementById('notificationSound');
+
+    // Wait 1 second before allowing the notification sound to play
+    setTimeout(function() {
+        database.ref('nameLog').on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Play the notification sound
+                notificationSound.volume = 0.5; // Set the volume to 50%
+                notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
+            }
+        });
+    }, 1000);
 });
 
 
