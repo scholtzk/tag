@@ -164,20 +164,35 @@ function playMusic() {
     backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
     musicToggle.style.display = 'none'; // Hide the button after playing
 
-    // Show popup after 5 seconds
-    setTimeout(function() {
-        popupImage.style.display = 'block';
-        
-        // Play popup sound
-        popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
-        
-        
-        
-        // Hide popup after 3 seconds
+    // Detect if the user is on an iPhone
+    const isIPhone = /iPhone/.test(navigator.userAgent) && !window.MSStream;
+
+    if (isIPhone) {
+        // Show popup after 6 seconds, resume background music after 5 seconds on iPhone
         setTimeout(function() {
-            popupImage.style.display = 'none';
-        }, 2500);
-    }, 5000);
+            popupImage.style.display = 'block';
+            popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
+        }, 6000);
+
+        setTimeout(function() {
+            backgroundMusic.volume = 1.0;
+            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+        }, 5000);
+    } else {
+        // Show popup and resume background music after 5 seconds on desktop
+        setTimeout(function() {
+            popupImage.style.display = 'block';
+            popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
+
+            backgroundMusic.volume = 1.0;
+            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+        }, 5000);
+    }
+
+    // Hide popup after 3 seconds
+    setTimeout(function() {
+        popupImage.style.display = 'none';
+    }, 8000);
 }
 
 musicToggle.addEventListener('click', playMusic);
