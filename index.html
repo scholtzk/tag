@@ -157,6 +157,14 @@ function updateCurrentName(name, taggedAt) {
             }
         });
 
+database.ref('timer').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
+        startTimer();
+    }
+});
+
 database.ref('nameLog').on('child_added', (snapshot) => {
     const data = snapshot.val();
     if (data) {
