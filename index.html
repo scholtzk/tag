@@ -90,17 +90,13 @@ function startTimer() {
 }
 
 function resetTimer(name) {
-    const newTagRef = database.ref('tags').push();
-    newTagRef.set({
-        name: name,
-        taggedAt: firebase.database.ServerValue.TIMESTAMP
-    })
-    .then(() => {
-        console.log('Timer reset with new tag');
-    })
-    .catch((error) => {
-        console.error('Error updating timer:', error);
+    const startTime = Date.now();
+    database.ref('timer').set({
+        startTime: startTime,
+        currentName: name,
+        taggedAt: startTime // Store the time when the player was tagged
     });
+    logNameInput(name);
 }
 
 function resetTimer(name) {
@@ -116,18 +112,10 @@ function resetTimer(name) {
     logNameInput(name);
 }
 
-function updateCurrentName() {
-    database.ref('tags').limitToLast(1).once('value', (snapshot) => {
-        const latestTag = snapshot.val();
-        if (latestTag) {
-            const { name, taggedAt } = Object.values(latestTag)[0];
-            const taggedDate = new Date(taggedAt);
-            const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
-        } else {
-            document.getElementById('currentName').textContent = 'Current: -';
-        }
-    });
+function updateCurrentName(name, taggedAt) {
+    const taggedDate = new Date(taggedAt);
+    const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
 }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -140,11 +128,10 @@ function updateCurrentName() {
             }
         });
 
-database.ref('tags').on('value', (snapshot) => {
+database.ref('timer').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        const latestTag = Object.values(data).pop();
-        updateCurrentName(latestTag.name, latestTag.taggedAt);
+        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
         startTimer();
     }
 });
