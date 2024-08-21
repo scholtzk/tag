@@ -89,25 +89,17 @@ function startTimer() {
     countdown = setInterval(updateTimer, 1000);
 }
 
-function updateTimer() {
-    database.ref('timer').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.startTime) {
-            const currentTime = Date.now();
-            const elapsedSeconds = Math.floor((currentTime - data.startTime) / 1000);
-            timeLeft = Math.max(24 * 60 * 60 - elapsedSeconds, 0);
-
-            const hours = Math.floor(timeLeft / 3600);
-            const minutes = Math.floor((timeLeft % 3600) / 60);
-            const seconds = timeLeft % 60;
-
-            document.getElementById('timer').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-            if (timeLeft === 0) {
-                clearInterval(countdown);
-            }
-        }
+function resetTimer(name) {
+    const newTagRef = database.ref('tags').push();
+    newTagRef.set({
+        name: name,
+        taggedAt: firebase.database.ServerValue.TIMESTAMP
+    })
+    .then(() => {
+        console.log('Timer reset with new tag');
+    })
+    .catch((error) => {
+        console.error('Error updating timer:', error);
     });
 }
 
@@ -124,17 +116,18 @@ function resetTimer(name) {
     logNameInput(name);
 }
 
-function updateCurrentName(name, taggedAt) {
-    if (taggedAt) {
-        const taggedDate = new Date(taggedAt);
-        const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
-        console.log('Tagged at timestamp:', taggedAt);
-        console.log('Formatted time:', formattedTime);
-    } else {
-        console.log('No valid taggedAt timestamp');
-        document.getElementById('currentName').textContent = `Current: ${name}`;
-    }
+function updateCurrentName() {
+    database.ref('tags').limitToLast(1).once('value', (snapshot) => {
+        const latestTag = snapshot.val();
+        if (latestTag) {
+            const { name, taggedAt } = Object.values(latestTag)[0];
+            const taggedDate = new Date(taggedAt);
+            const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
+        } else {
+            document.getElementById('currentName').textContent = 'Current: -';
+        }
+    });
 }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -147,14 +140,12 @@ function updateCurrentName(name, taggedAt) {
             }
         });
 
-database.ref('timer').on('value', (snapshot) => {
+database.ref('tags').on('value', (snapshot) => {
     const data = snapshot.val();
-    if (data && data.currentName && data.taggedAt) {
-        console.log('Received data:', data);
-        updateCurrentName(data.currentName, data.taggedAt);
+    if (data) {
+        const latestTag = Object.values(data).pop();
+        updateCurrentName(latestTag.name, latestTag.taggedAt);
         startTimer();
-    } else {
-        console.log('Incomplete data received:', data);
     }
 });
 
@@ -193,6 +184,14 @@ checkServerTime();
             const date = new Date(entry.timestamp);
             console.log(`${entry.name}: ${date.toLocaleString()}`);
         }
+    });
+}
+
+        function logNameInput(name) {
+    const newLogRef = database.ref('nameLog').push();
+    newLogRef.set({
+        name: name,
+        taggedAt: firebase.database.ServerValue.TIMESTAMP
     });
 }
 
