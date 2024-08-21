@@ -114,16 +114,19 @@ function updateTimer() {
 function resetTimer(name) {
     const updates = {
         currentName: name,
-        taggedAt: firebase.database.ServerValue.TIMESTAMP // Use server timestamp
+        taggedAt: firebase.database.ServerValue.TIMESTAMP
     };
     database.ref('timer').update(updates);
     logNameInput(name);
 }
 
 function updateCurrentName(name, taggedAt) {
-    const taggedDate = new Date(taggedAt);
-    const formattedTime = taggedDate.toLocaleString(); // This will show date and time
-    document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
+    database.ref('timer/taggedAt').once('value', (snapshot) => {
+        const serverTaggedAt = snapshot.val();
+        const taggedDate = new Date(serverTaggedAt);
+        const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
+    });
 }
 
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
@@ -139,7 +142,7 @@ function updateCurrentName(name, taggedAt) {
 database.ref('timer').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
+        updateCurrentName(data.currentName || '', data.taggedAt);
         startTimer();
     }
 });
