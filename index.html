@@ -176,14 +176,14 @@ checkServerTime();
         timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 }
-        function resetTimer(name) {
-    const startTime = Date.now();
-    database.ref('timer').set({
-        startTime: startTime,
-        currentName: name
-    });
-    logNameInput(name);
-}
+//        function resetTimer(name) {
+//    const startTime = Date.now();
+//    database.ref('timer').set({
+//        startTime: startTime,
+//        currentName: name
+//    });
+//    logNameInput(name);
+// }
         function displayNameLog() {
     database.ref('nameLog').orderByChild('timestamp').limitToLast(50).once('value', (snapshot) => {
         const log = snapshot.val();
