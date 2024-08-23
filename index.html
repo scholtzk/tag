@@ -7,6 +7,7 @@
 <meta property="og:image" content="http://www.quickmeme.com/img/28/289c18fc36dd544076855b51d74f244a1e2484de59fee2bbbb28a1b8bf1e8837.jpg">
 <meta property="og:url" content="https://scholtzk.github.io/tag/">
 <meta property="og:type" content="website">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>24-Hour Tag Timer</title>
     <style>
@@ -48,6 +49,10 @@
             object-fit: cover;
             z-index: 1000;
         }
+
+            #Image1 {
+        display: none;
+    }
     </style>
 </head>
 <body>
@@ -72,7 +77,9 @@
         Your browser does not support the audio element.
     </audio>
 
-    <img id="popupImage" src="popup.jpg" alt="Popup Image">
+<!-- <img id="popupImage" src="popup.jpg" alt="Popup Image"> -->
+
+    <img id="Image1" src="http://www.quickmeme.com/img/28/289c18fc36dd544076855b51d74f244a1e2484de59fee2bbbb28a1b8bf1e8837.jpg" alt="Image1">
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -152,6 +159,20 @@ function updateCurrentName(name, taggedAt) {
     document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
 }
 
+function showPopup() {
+    const popupImage = document.createElement('img');
+    popupImage.id = 'popupImage';
+    popupImage.src = 'popup.jpg';
+    popupImage.alt = 'Popup Image';
+    popupImage.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1000;';
+    document.body.appendChild(popupImage);
+    popupImage.style.display = 'block';
+    
+    setTimeout(() => {
+        popupImage.remove();
+    }, 3000);
+}        
+
         document.getElementById('nameInput').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
                 const name = this.value.trim();
@@ -203,32 +224,15 @@ function playMusic() {
     // Detect if the user is on an iPhone
     const isIPhone = /iPhone/.test(navigator.userAgent) && !window.MSStream;
 
-    if (isIPhone) {
-        // Show popup after 6 seconds, resume background music after 5 seconds on iPhone
-        setTimeout(function() {
-            popupImage.style.display = 'block';
-            popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
-        }, 5250);
-
-        setTimeout(function() {
-            backgroundMusic.volume = 1.0;
-            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
-        }, 5000);
-    } else {
-        // Show popup and resume background music after 5 seconds on desktop
-        setTimeout(function() {
-            popupImage.style.display = 'block';
-            popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
-
-            backgroundMusic.volume = 1.0;
-            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
-        }, 5000);
-    }
-
-    // Hide popup after 3 seconds
     setTimeout(function() {
-        popupImage.style.display = 'none';
-    }, 8000);
+        showPopup();
+        popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
+
+        backgroundMusic.volume = 1.0;
+        backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+    }, 5000);
+
+    // Remove the setTimeout for hiding the popup, as it's now handled in the showPopup function
 }
 
 musicToggle.addEventListener('click', playMusic);
