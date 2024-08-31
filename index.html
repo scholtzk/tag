@@ -31,6 +31,12 @@
             font-size: 24px;
             margin-top: 20px;
         }
+        #gameOverImage {
+            max-width: 80%;
+            height: auto;
+            margin-top: 20px;
+            display: none;
+        }
         #popupImage {
             display: none;
             position: fixed;
@@ -44,6 +50,13 @@
         #Image1 {
             display: none;
         }
+                @media screen and (min-width: 768px) {
+            #gameOverImage {
+                max-width: 50%;
+                max-height: 300px; /* Adjust this value as needed */
+                object-fit: contain;
+            }
+        }
     </style>
 </head>
 <body>
@@ -51,6 +64,8 @@
     <input type="text" id="nameInput" placeholder="Type name and press enter">
     <div id="currentName"></div>
     <button id="musicToggle">Play Music</button>
+
+    <img id="gameOverImage" src="game_over2.jpg" alt="Game Over" style="display: none;">
 
     <img id="Image1" src="warning.jpg" alt="Image1">
 
@@ -115,7 +130,13 @@
             }
         }
 
-        function endGame() {
+
+        function showGameOverPopup() {
+            const gameOverImage = document.getElementById('gameOverImage');
+            gameOverImage.style.display = 'block';
+        }
+
+                function endGame() {
             clearInterval(countdown);
             gameEnded = true;
             
@@ -133,15 +154,6 @@
             });
             
             showGameOverPopup();
-        }
-
-        function showGameOverPopup() {
-            const popupImage = document.createElement('img');
-            popupImage.id = 'gameOverPopup';
-            popupImage.src = 'game_over2.jpg';
-            popupImage.alt = 'Game Over';
-            popupImage.style.cssText = 'display: block; position: fixed; top: 50%; left: 20%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%; z-index: 1000;';
-            document.body.appendChild(popupImage);
         }
 
         function resetTimer(name) {
