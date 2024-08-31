@@ -2,12 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta property="og:title" content="24-Hour Tag Timer">
-<meta property="og:description" content="penis penis penis penis penis penis">
-<meta property="og:image" content="http://www.quickmeme.com/img/28/289c18fc36dd544076855b51d74f244a1e2484de59fee2bbbb28a1b8bf1e8837.jpg">
-<meta property="og:url" content="https://scholtzk.github.io/tag/">
-<meta property="og:type" content="website">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>24-Hour Tag Timer</title>
     <style>
@@ -29,16 +23,14 @@
             font-size: 18px;
             padding: 5px;
             margin-bottom: 10px;
-                width: 250px; /* Increase the width of the input box */
-    text-align: center; /* Center the text within the input box */
+            width: 250px;
+            text-align: center;
         }
-
         #musicToggle { margin-top: 20px; padding: 10px; font-size: 16px; }
         #currentName {
             font-size: 24px;
             margin-top: 20px;
         }
-
         #popupImage {
             display: none;
             position: fixed;
@@ -49,10 +41,9 @@
             object-fit: cover;
             z-index: 1000;
         }
-
-            #Image1 {
-        display: none;
-    }
+        #Image1 {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -63,58 +54,54 @@
 
     <img id="Image1" src="warning.jpg" alt="Image1">
 
-
     <audio id="backgroundMusic" loop>
         <source src="karma2.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
     <audio id="notificationSound">
-    <source src="popup.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
+        <source src="popup.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <audio id="popupSound">
         <source src="popup.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
-
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
         const firebaseConfig = {
-              apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
-  authDomain: "megatag-fc711.firebaseapp.com",
-  databaseURL: "https://megatag-fc711-default-rtdb.firebaseio.com",
-  projectId: "megatag-fc711",
-  storageBucket: "megatag-fc711.appspot.com",
-  messagingSenderId: "356543639766",
-  appId: "1:356543639766:web:06ebc390086f6d00a41977",
-  measurementId: "G-CQ40WBZY41"
+            apiKey: "AIzaSyD3dG3fZ3_jZFRxuHSHENUe0Nn9EKsorcw",
+            authDomain: "megatag-fc711.firebaseapp.com",
+            databaseURL: "https://megatag-fc711-default-rtdb.firebaseio.com",
+            projectId: "megatag-fc711",
+            storageBucket: "megatag-fc711.appspot.com",
+            messagingSenderId: "356543639766",
+            appId: "1:356543639766:web:06ebc390086f6d00a41977",
+            measurementId: "G-CQ40WBZY41"
         };
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let countdown;
-        let timeLeft = 24 * 60 * 60; // 24 hours in seconds
+        let gameEnded = false;
 
-function startTimer() {
-    clearInterval(countdown);
-    updateTimer(); // Update immediately
-    countdown = setInterval(updateTimer, 1000);
-}
+        function startTimer() {
+            clearInterval(countdown);
+            updateTimer(); // Update immediately
+            countdown = setInterval(updateTimer, 1000);
+        }
 
-function updateTimer() {
-    database.ref('timer').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.startTime) {
-            const currentTime = Date.now();
-            const elapsedSeconds = Math.floor((currentTime - data.startTime) / 1000);
-            timeLeft = Math.max(24 * 60 * 60 - elapsedSeconds, 0);
+        function updateTimer() {
+            if (gameEnded) return;
+
+            const now = new Date();
+            const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            const timeLeft = Math.max(Math.floor((endTime - now) / 1000), 0);
 
             const hours = Math.floor(timeLeft / 3600);
             const minutes = Math.floor((timeLeft % 3600) / 60);
@@ -124,123 +111,127 @@ function updateTimer() {
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeLeft === 0) {
-                clearInterval(countdown);
+                endGame();
             }
         }
-    });
-}
 
-function resetTimer(name) {
-    const startTime = Date.now();
-    database.ref('timer').set({
-        startTime: startTime,
-        currentName: name,
-        taggedAt: startTime // Store the time when the player was tagged
-    });
-    logNameInput(name);
-}
-
-function logNameInput(name) {
-    const logRef = database.ref('nameLog').push();
-    logRef.set({
-        name: name,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
-
-    // Play the notification sound
-    const notificationSound = document.getElementById('notificationSound');
-    notificationSound.volume = 1; // Set the volume to 50%
-    notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
-}
-        
-function updateCurrentName(name, taggedAt) {
-    const taggedDate = new Date(taggedAt);
-    const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
-}
-
-function showPopup() {
-    const popupImage = document.createElement('img');
-    popupImage.id = 'popupImage';
-    popupImage.src = 'popup.jpg';
-    popupImage.alt = 'Popup Image';
-    popupImage.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1000;';
-    document.body.appendChild(popupImage);
-    popupImage.style.display = 'block';
-    
-    setTimeout(() => {
-        popupImage.remove();
-    }, 3000);
-}        
-
-        document.getElementById('nameInput').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                const name = this.value.trim();
-                if (name) {
-                    resetTimer(name);
-                    this.value = '';
+        function endGame() {
+            clearInterval(countdown);
+            gameEnded = true;
+            
+            document.getElementById('timer').textContent = "GAME OVER";
+            
+            const nameInput = document.getElementById('nameInput');
+            nameInput.disabled = true;
+            nameInput.placeholder = "Game has ended";
+            
+            database.ref('timer').once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.currentName) {
+                    document.getElementById('currentName').textContent = `Final Loser: ${data.currentName}`;
                 }
-            }
-        });
+            });
+            
+            showGameOverPopup();
+        }
 
-database.ref('timer').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        updateCurrentName(data.currentName || '', data.taggedAt || Date.now());
-        startTimer();
-    }
-});
+        function showGameOverPopup() {
+            const popupImage = document.createElement('img');
+            popupImage.id = 'gameOverPopup';
+            popupImage.src = 'game_over2.jpg';
+            popupImage.alt = 'Game Over';
+            popupImage.style.cssText = 'display: block; position: fixed; top: 50%; left: 20%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%; z-index: 1000;';
+            document.body.appendChild(popupImage);
+        }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const notificationSound = document.getElementById('notificationSound');
+        function resetTimer(name) {
+            if (gameEnded) return;
 
-    // Disable the notification sound script for the first 1 second
-    let notificationSoundEnabled = false;
-    setTimeout(function() {
-        notificationSoundEnabled = true;
-    }, 1000);
+            const taggedAt = firebase.database.ServerValue.TIMESTAMP;
+            database.ref('timer').set({
+                currentName: name,
+                taggedAt: taggedAt
+            });
+            logNameInput(name);
+        }
 
-    database.ref('nameLog').on('child_added', (snapshot) => {
-        const data = snapshot.val();
-        if (data && notificationSoundEnabled) {
-            // Play the notification sound
-            notificationSound.volume = 0.5; // Set the volume to 50%
+        function updateCurrentName(name, taggedAt) {
+            const taggedDate = new Date(taggedAt);
+            const formattedTime = taggedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('currentName').textContent = `Current: ${name} (Tagged at ${formattedTime})`;
+        }
+
+        function logNameInput(name) {
+            const logRef = database.ref('nameLog').push();
+            logRef.set({
+                name: name,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            const notificationSound = document.getElementById('notificationSound');
+            notificationSound.volume = 1;
             notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
         }
-    });
-});
 
+        document.addEventListener('DOMContentLoaded', function() {
+            startTimer();
+            
+            const now = new Date();
+            const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            if (now >= endTime) {
+                endGame();
+            }
+            
+            document.getElementById('nameInput').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    const name = this.value.trim();
+                    if (name) {
+                        resetTimer(name);
+                        this.value = '';
+                    }
+                }
+            });
+
+            database.ref('timer').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.currentName && data.taggedAt) {
+                    updateCurrentName(data.currentName, data.taggedAt);
+                }
+            });
+
+            const notificationSound = document.getElementById('notificationSound');
+
+            let notificationSoundEnabled = false;
+            setTimeout(function() {
+                notificationSoundEnabled = true;
+            }, 1000);
+
+            database.ref('nameLog').on('child_added', (snapshot) => {
+                const data = snapshot.val();
+                if (data && notificationSoundEnabled) {
+                    notificationSound.volume = 0.5;
+                    notificationSound.play().catch(error => console.log('Notification sound autoplay prevented:', error));
+                }
+            });
+        });
 
         const backgroundMusic = document.getElementById('backgroundMusic');
         const musicToggle = document.getElementById('musicToggle');
         const popupSound = document.getElementById('popupSound');
-        const popupImage = document.getElementById('popupImage');
 
-function playMusic() {
-    backgroundMusic.volume = 1; // Set initial volume to 100%
-    backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
-    musicToggle.style.display = 'none'; // Hide the button after playing
+        function playMusic() {
+            backgroundMusic.volume = 1;
+            backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+            musicToggle.style.display = 'none';
 
-    // Detect if the user is on an iPhone
-    const isIPhone = /iPhone/.test(navigator.userAgent) && !window.MSStream;
+            setTimeout(function() {
+                popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
+                backgroundMusic.volume = 1.0;
+                backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
+            }, 5000);
+        }
 
-    setTimeout(function() {
-        showPopup();
-        popupSound.play().catch(error => console.log('Popup sound autoplay prevented:', error));
-
-        backgroundMusic.volume = 1.0;
-        backgroundMusic.play().catch(error => console.log('Background music autoplay prevented:', error));
-    }, 5000);
-
-    // Remove the setTimeout for hiding the popup, as it's now handled in the showPopup function
-}
-
-musicToggle.addEventListener('click', playMusic);
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Do not play the background music automatically when the page loads
-});
-
+        musicToggle.addEventListener('click', playMusic);
     </script>
 </body>
 </html>
